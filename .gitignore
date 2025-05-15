@@ -1,0 +1,11 @@
+.env
+.ipynb_checkpoints
+.pytest_cache
+*.egg-info
+__pycache__
+
+mcio/
+data/
+
+.DS_Store
+.vscode
