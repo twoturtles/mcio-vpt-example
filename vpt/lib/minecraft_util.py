@@ -4,7 +4,7 @@ from typing import Optional, Tuple
 
 import torch
 
-from .lib.action_head import (
+from .action_head import (
     CategoricalActionHead,
     DiagGaussianActionHead,
     DictActionHead,

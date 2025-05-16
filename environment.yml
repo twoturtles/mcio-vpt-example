@@ -1,0 +1,15 @@
+name: vpt-llm
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - opencv
+  - pip:
+    - attrs
+    - gym==0.23
+    - gym3  # vpt dependency
+    - mcio_ctrl
+    - opencv-python
+    - torch
+    - tqdm
+    - xvfbwrapper

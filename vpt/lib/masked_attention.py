@@ -3,9 +3,9 @@ import functools
 import torch as th
 from torch import nn
 
-from .lib import xf
-from .lib.minecraft_util import store_args
-from .lib.tree_util import tree_map
+from . import xf
+from .minecraft_util import store_args
+from .tree_util import tree_map
 
 
 @functools.lru_cache()

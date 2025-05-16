@@ -6,12 +6,12 @@ import torch as th
 from torch import nn
 from torch.nn import functional as F
 
-from .lib.action_head import make_action_head
-from .lib.impala_cnn import ImpalaCNN
-from .lib.misc import transpose
-from .lib.scaled_mse_head import ScaledMSEHead
-from .lib.tree_util import tree_map
-from .lib.util import FanInInitReLULayer, ResidualRecurrentBlocks
+from .action_head import make_action_head
+from .impala_cnn import ImpalaCNN
+from .misc import transpose
+from .scaled_mse_head import ScaledMSEHead
+from .tree_util import tree_map
+from .util import FanInInitReLULayer, ResidualRecurrentBlocks
 
 
 class ImgPreprocessing(nn.Module):
@@ -22,9 +22,7 @@ class ImgPreprocessing(nn.Module):
     :param scale_img: If true and img_statistics not specified, scale incoming images by 1/255.
     """
 
-    def __init__(
-        self, img_statistics: Optional[str] = None, scale_img: bool = True
-    ):
+    def __init__(self, img_statistics: Optional[str] = None, scale_img: bool = True):
         super().__init__()
         self.img_mean = None
         if img_statistics is not None:
@@ -144,10 +142,7 @@ class MinecraftPolicy(nn.Module):
         # Dense init kwargs replaces batchnorm/groupnorm with layernorm
         self.init_norm_kwargs = init_norm_kwargs
         self.dense_init_norm_kwargs = deepcopy(init_norm_kwargs)
-        if (
-            self.dense_init_norm_kwargs.get("group_norm_groups", None)
-            is not None
-        ):
+        if self.dense_init_norm_kwargs.get("group_norm_groups", None) is not None:
             self.dense_init_norm_kwargs.pop("group_norm_groups", None)
             self.dense_init_norm_kwargs["layer_norm"] = True
         if self.dense_init_norm_kwargs.get("batch_norm", False):
@@ -281,9 +276,7 @@ class MinecraftAgentPolicy(nn.Module):
         else:
             mask = None
 
-        (pi_h, v_h), state_out = self.net(
-            obs, state_in, context={"first": first}
-        )
+        (pi_h, v_h), state_out = self.net(obs, state_in, context={"first": first})
 
         pi_logits = self.pi_head(pi_h, mask=mask)
         vpred = self.value_head(v_h)
@@ -322,9 +315,7 @@ class MinecraftAgentPolicy(nn.Module):
         obs = tree_map(lambda x: x.unsqueeze(1), obs)
         first = first.unsqueeze(1)
 
-        (pd, vpred, _), state_out = self(
-            obs=obs, first=first, state_in=state_in
-        )
+        (pd, vpred, _), state_out = self(obs=obs, first=first, state_in=state_in)
 
         return pd, self.value_head.denormalize(vpred)[:, 0], state_out
 
@@ -342,9 +333,7 @@ class MinecraftAgentPolicy(nn.Module):
         obs = tree_map(lambda x: x.unsqueeze(1), obs)
         first = first.unsqueeze(1)
 
-        (pd, vpred, _), state_out = self(
-            obs=obs, first=first, state_in=state_in
-        )
+        (pd, vpred, _), state_out = self(obs=obs, first=first, state_in=state_in)
 
         if taken_action is None:
             ac = self.pi_head.sample(pd, deterministic=not stochastic)
@@ -370,9 +359,7 @@ class MinecraftAgentPolicy(nn.Module):
         obs = tree_map(lambda x: x.unsqueeze(1), obs)
         first = first.unsqueeze(1)
 
-        (pd, vpred, _), state_out = self(
-            obs=obs, first=first, state_in=state_in
-        )
+        (pd, vpred, _), state_out = self(obs=obs, first=first, state_in=state_in)
 
         # After unsqueezing, squeeze back
         return self.value_head.denormalize(vpred)[:, 0]
@@ -458,9 +445,7 @@ class InverseActionPolicy(nn.Module):
 
         pi_head_kwargs = {} if pi_head_kwargs is None else pi_head_kwargs
 
-        self.pi_head = self.make_action_head(
-            pi_out_size=pi_out_size, **pi_head_kwargs
-        )
+        self.pi_head = self.make_action_head(pi_out_size=pi_out_size, **pi_head_kwargs)
 
     def make_action_head(self, **kwargs):
         return make_action_head(self.action_space, **kwargs)

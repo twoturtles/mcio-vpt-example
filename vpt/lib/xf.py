@@ -9,8 +9,8 @@ import torch as th
 from torch import nn
 from torch.nn import functional as F
 
-from .lib import misc, mlp, util
-from .lib import torch_util as tu
+from . import misc, mlp, util
+from . import torch_util as tu
 
 SENTINEL = 0.1337
 

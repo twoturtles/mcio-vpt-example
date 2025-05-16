@@ -1,7 +1,7 @@
 from torch import nn
 
-from .lib import misc
-from .lib import torch_util as tu
+from . import misc
+from . import torch_util as tu
 
 
 class MLP(nn.Module):
