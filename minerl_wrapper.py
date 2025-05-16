@@ -1,7 +1,4 @@
 import contextlib
-import fcntl
-import os
-import random
 from pathlib import Path
 from typing import Iterator
 
@@ -9,34 +6,13 @@ from mcio_ctrl.envs.minerl_env import MinerlEnv
 from mcio_ctrl.instance import Installer, InstanceManager
 from mcio_ctrl.types import MCioMode, RunOptions
 from mcio_ctrl.world import STORAGE_LOCATION, WorldManager
-from xvfbwrapper import Xvfb
 
 MCIO_DIR = "./mcio"
 INSTANCE_NAME = "main"
 
 
-class XvfbFixed(Xvfb):
-    def _get_next_unused_display(self):
-        filepath = os.path.join(self._tempdir, ".X{0}-lock")
-        # RNG now depends on PID
-        rng = random.Random(hash((os.getpid(), random.random())))
-
-        while True:
-            display = rng.randint(1, self.__class__.MAX_DISPLAY)
-
-            if os.path.exists(filepath.format(display)):
-                continue
-            self._lock_display_file = open(filepath.format(display), "w")
-            try:
-                fcntl.flock(self._lock_display_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            except BlockingIOError:
-                continue
-
-            return display
-
-
 @contextlib.contextmanager
-def minerl_env(seed) -> Iterator[MinerlEnv]:
+def minerl_env(seed, headless: bool) -> Iterator[MinerlEnv]:
     mcio_dir = Path(MCIO_DIR).absolute()
     world_name = f"world_{seed}"
 
@@ -55,7 +31,13 @@ def minerl_env(seed) -> Iterator[MinerlEnv]:
     wm.copy(STORAGE_LOCATION, world_name, INSTANCE_NAME)
 
     env = None
-    with XvfbFixed():
+    if headless:
+        from xvfbfixed import XvfbFixed
+
+        context = XvfbFixed
+    else:
+        context = contextlib.nullcontext
+    with context:
         try:
             opts = RunOptions(
                 mcio_dir=mcio_dir,

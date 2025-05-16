@@ -6,21 +6,28 @@ from vpt.agent import MineRLAgent, load_vpt
 
 
 def main():
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--headless")
+    args = parser.parse_args()
+
     vpt: MineRLAgent = load_vpt(
         model_filepath="data/3x.model",
-        weights_filepath="data/foundation-model-3x.weights",
+        weights_filepath="data/bc-house-3x.weights",
         device="cuda",
     )
     vpt.reset()
 
-    with minerl_env(seed=0) as env:
-        env.reset(seed=0)
+    with minerl_env(seed=1, headless=args.headless) as env:
+        env.reset(seed=1)
         obs, _, _, _, _ = env.skip_steps(100)  # Wait for rendering...
 
         frames = []
-        for _ in tqdm.trange(1000):
+        for t in tqdm.trange(600):
             action = vpt.get_action(obs)
             action = {k: v[0] if k == "camera" else v.item() for k, v in action.items()}
+            action["ESC"] = 0
 
             obs, _, _, _, _ = env.step(action)
             frames.append(obs["pov"])

@@ -1,4 +1,4 @@
-name: vpt-llm
+name: mcio-vpt-test
 channels:
   - conda-forge
 dependencies:
@@ -7,7 +7,7 @@ dependencies:
   - pip:
     - attrs
     - gym==0.23
-    - gym3  # vpt dependency
+    - gym3
     - mcio_ctrl
     - opencv-python
     - torch
