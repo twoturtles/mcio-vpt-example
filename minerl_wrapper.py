@@ -14,13 +14,13 @@ INSTANCE_NAME = "main"
 @contextlib.contextmanager
 def minerl_env(seed, headless: bool) -> Iterator[MinerlEnv]:
     mcio_dir = Path(MCIO_DIR).absolute()
+    mcio_dir.mkdir(exist_ok=True)
     world_name = f"world_{seed}"
 
     im = InstanceManager(mcio_dir)
     if not im.instance_exists(INSTANCE_NAME):
         installer = Installer(INSTANCE_NAME, mcio_dir)
         installer.install()
-
         im.install_mod(INSTANCE_NAME, "sodium")
 
     wm = WorldManager(mcio_dir)
