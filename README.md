@@ -9,10 +9,11 @@ called `data/`. For example:
     https://openaipublic.blob.core.windows.net/minecraft-rl/models/foundation-model-3x.model`
     - `wget -P data/
     https://openaipublic.blob.core.windows.net/minecraft-rl/models/bc-house-3x.weights`
-3. Run `main.py`. Add the `--headless` flag for running on headless systems.
+3. Run `run_vpt.py`. Add the `--headless` flag for running on headless systems.
 
 ## Instructions for STEVE-1:
-1. Download VPT's 2x.model, MineCLIP weights, STEVE-1 prior weights, and STEVE-1 policy
+1. Install dependencies (see above).
+2. Download VPT's 2x.model, MineCLIP weights, STEVE-1 prior weights, and STEVE-1 policy
 weights:
     - `wget -O data/2x.model
     https://openaipublic.blob.core.windows.net/minecraft-rl/models/2x.model`
@@ -22,3 +23,6 @@ weights:
     data/steve1_prior.pt`
     - `gdown https://drive.google.com/uc?id=1E3fd_-H1rRZqMkUKHfiMhx-ppLLehQPI -O
     data/steve1.weights `
+3. Run `run_steve1.py {prompt}` with the desired prompt, e.g. for the logs task, the
+prompt 'chop down the tree, gather wood, pick up wood, chop it down, break tree' was
+used in the paper. Add the `--headless` flag for running on headless systems.

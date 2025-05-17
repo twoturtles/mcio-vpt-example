@@ -131,6 +131,9 @@ class STEVE1PromptEncoder(nn.Module):
         return emb
 
 
+# TODO: support for guidance.
+
+
 def main():
     import argparse
 
