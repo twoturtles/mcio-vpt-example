@@ -9,9 +9,10 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--headless")
+    parser.add_argument("--headless", action="store_true")
     parser.add_argument("--model", default="data/3x.model")
     parser.add_argument("--weights", default="data/bc-house-3x.weights")
+    parser.add_argument("--steps", type=int, default=600)
     args = parser.parse_args()
 
     vpt: MineRLAgent = load_vpt(
@@ -24,7 +25,7 @@ def main():
         obs, _, _, _, _ = env.skip_steps(100)  # Wait for rendering...
 
         frames = []
-        for t in tqdm.trange(600):
+        for t in tqdm.trange(args.steps):
             action = vpt.get_action(obs)
             action = {k: v[0] if k == "camera" else v.item() for k, v in action.items()}
             action["ESC"] = 0

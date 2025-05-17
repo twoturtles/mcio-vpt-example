@@ -6,6 +6,8 @@ dependencies:
   - opencv
   - pip:
     - attrs
+    - einops
+    - gdown
     - gym==0.23
     - gym3
     - mcio_ctrl
@@ -13,3 +15,4 @@ dependencies:
     - torch
     - tqdm
     - xvfbwrapper
+    - git+https://github.com/jxiong21029/MineCLIP-model

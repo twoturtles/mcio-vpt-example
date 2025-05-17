@@ -37,7 +37,7 @@ def minerl_env(seed, headless: bool) -> Iterator[MinerlEnv]:
         context = XvfbFixed
     else:
         context = contextlib.nullcontext
-    with context:
+    with context():
         try:
             opts = RunOptions(
                 mcio_dir=mcio_dir,

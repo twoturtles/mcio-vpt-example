@@ -166,8 +166,8 @@ class MineRLAgent:
         """
         agent_input = resize_image(minerl_obs["pov"], AGENT_RESOLUTION)[None]
         agent_input = {"img": th.from_numpy(agent_input).to(self.device)}
-        if self.cond_embed is not None:  # Added for STEVE-1 support
-            agent_input["cond_embed"] = self.cond_embed
+        if "cond_embed" in minerl_obs:  # Added for STEVE-1 support
+            agent_input["cond_embed"] = minerl_obs["cond_embed"]
         return agent_input
 
     def _agent_action_to_env(self, agent_action):
