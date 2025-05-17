@@ -10,12 +10,12 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--headless")
+    parser.add_argument("--model", default="data/3x.model")
+    parser.add_argument("--weights", default="data/bc-house-3x.weights")
     args = parser.parse_args()
 
     vpt: MineRLAgent = load_vpt(
-        model_filepath="data/3x.model",
-        weights_filepath="data/bc-house-3x.weights",
-        device="cuda",
+        model_filepath=args.model, weights_filepath=args.weights, device="cuda"
     )
     vpt.reset()
 

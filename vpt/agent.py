@@ -145,6 +145,8 @@ class MineRLAgent:
         self.hidden_state = self.policy.initial_state(1)
         self._dummy_first = th.from_numpy(np.array((False,))).to(device)
 
+        self.cond_embed = None  # Added for STEVE-1 support
+
     def load_weights(self, path):
         """Load model weights from a path, and reset hidden state"""
         self.policy.load_state_dict(
@@ -164,6 +166,8 @@ class MineRLAgent:
         """
         agent_input = resize_image(minerl_obs["pov"], AGENT_RESOLUTION)[None]
         agent_input = {"img": th.from_numpy(agent_input).to(self.device)}
+        if self.cond_embed is not None:  # Added for STEVE-1 support
+            agent_input["cond_embed"] = self.cond_embed
         return agent_input
 
     def _agent_action_to_env(self, agent_action):

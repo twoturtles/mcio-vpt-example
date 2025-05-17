@@ -209,6 +209,9 @@ class MinecraftPolicy(nn.Module):
         if self.pre_lstm_ln is not None:
             x = self.pre_lstm_ln(x)
 
+        if "cond_emb" in ob:  # Added for STEVE-1 support
+            x = x + ob["cond_emb"].type_as(x)
+
         if self.recurrent_layer is not None:
             x, state_out = self.recurrent_layer(x, first, state_in)
         else:
