@@ -1,0 +1,13 @@
+# To install using uv - https://docs.astral.sh/uv/
+# uv venv -p 3.12
+# source .venv/bin/activate
+# uv pip install -r requirements.txt
+attrs
+einops
+gdown
+mcio_ctrl
+opencv-python
+torch
+tqdm
+xvfbwrapper
+git+https://github.com/jxiong21029/MineCLIP-model

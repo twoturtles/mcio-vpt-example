@@ -5,9 +5,9 @@ import torch
 import torch.nn as nn
 import tqdm
 from mineclip import MineCLIP
+import mcio_ctrl as mc
 
 from minerl_wrapper import minerl_env
-from utils import save_frames_to_mp4
 from vpt.agent import MineRLAgent
 
 MINECLIP_CONFIG = {
@@ -181,7 +181,7 @@ def main():
             obs, _, _, _, _ = env.step(action)
             frames.append(obs["pov"])
 
-    save_frames_to_mp4(frames, "episode_steve1.mp4")
+    mc.util.VideoWriter(frames).write("episode_steve1.mp4")
 
 
 if __name__ == "__main__":

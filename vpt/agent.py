@@ -4,7 +4,7 @@ import pickle
 import cv2
 import numpy as np
 import torch as th
-from gym import spaces
+from gymnasium import spaces
 from gym3.types import DictType
 
 from .lib.action_mapping import CameraHierarchicalMapping
