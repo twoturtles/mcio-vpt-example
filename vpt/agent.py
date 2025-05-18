@@ -148,10 +148,7 @@ class MineRLAgent:
         self.policy = MinecraftAgentPolicy(**agent_kwargs).to(device)
         self._dummy_first = th.from_numpy(np.array((False,))).to(device)
         self.guidance = guidance
-        if guidance > 0:
-            self.hidden_state = self.policy.initial_state(2)
-        else:
-            self.hidden_state = self.policy.initial_state(1)
+        self.hidden_state = self.policy.initial_state(2 if guidance > 0 else 1)
 
     def load_weights(self, path):
         """Load model weights from a path, and reset hidden state"""

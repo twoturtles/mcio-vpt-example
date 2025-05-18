@@ -23,6 +23,8 @@ weights:
     data/steve1_prior.pt`
     - `gdown https://drive.google.com/uc?id=1E3fd_-H1rRZqMkUKHfiMhx-ppLLehQPI -O
     data/steve1.weights `
-3. Run `run_steve1.py {prompt}` with the desired prompt, e.g. for the logs task, the
-prompt 'chop down the tree, gather wood, pick up wood, chop it down, break tree' was
-used in the paper. Add the `--headless` flag for running on headless systems.
+3. Run `run_steve1.py {prompt}` with the desired prompt
+    - E.g. for the logs task, the prompt 'chop down the tree, gather wood, pick up wood,
+    chop it down, break tree' was used in the paper.
+    - Add the `--headless` flag for running on headless systems.
+    - Add `--guidance {guidance}` to set the classifier-free guidance scale (default 0).
