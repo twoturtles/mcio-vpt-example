@@ -116,9 +116,13 @@ def resize_image(img, target_resolution):
 
 
 class MineRLAgent:
-    def __init__(self, device=None, policy_kwargs=None, pi_head_kwargs=None):
-        # validate_env(env)
-
+    def __init__(
+        self,
+        device=None,
+        policy_kwargs=None,
+        pi_head_kwargs=None,
+        guidance: float = 0.0,
+    ):
         if device is None:
             device = default_device_type()
         self.device = th.device(device)
@@ -142,10 +146,12 @@ class MineRLAgent:
         )
 
         self.policy = MinecraftAgentPolicy(**agent_kwargs).to(device)
-        self.hidden_state = self.policy.initial_state(1)
         self._dummy_first = th.from_numpy(np.array((False,))).to(device)
-
-        self.cond_embed = None  # Added for STEVE-1 support
+        self.guidance = guidance
+        if guidance > 0:
+            self.hidden_state = self.policy.initial_state(2)
+        else:
+            self.hidden_state = self.policy.initial_state(1)
 
     def load_weights(self, path):
         """Load model weights from a path, and reset hidden state"""
@@ -156,7 +162,7 @@ class MineRLAgent:
 
     def reset(self):
         """Reset agent to initial state (i.e., reset hidden state)"""
-        self.hidden_state = self.policy.initial_state(1)
+        self.hidden_state = self.policy.initial_state(2 if self.guidance > 0 else 1)
 
     def _env_obs_to_agent(self, minerl_obs):
         """
@@ -167,7 +173,9 @@ class MineRLAgent:
         agent_input = resize_image(minerl_obs["pov"], AGENT_RESOLUTION)[None]
         agent_input = {"img": th.from_numpy(agent_input).to(self.device)}
         if "cond_embed" in minerl_obs:  # Added for STEVE-1 support
-            agent_input["cond_embed"] = minerl_obs["cond_embed"]
+            agent_input["cond_embed"] = th.from_numpy(minerl_obs["cond_embed"]).to(
+                self.device
+            )
         return agent_input
 
     def _agent_action_to_env(self, agent_action):
@@ -225,7 +233,11 @@ class MineRLAgent:
         # boundaries, but we are only using this for predicting (for now),
         # so we do not hassle with it yet.
         agent_action, self.hidden_state, _ = self.policy.act(
-            agent_input, self._dummy_first, self.hidden_state, stochastic=True
+            agent_input,
+            self._dummy_first,
+            self.hidden_state,
+            stochastic=True,
+            guidance=self.guidance,
         )
         minerl_action = self._agent_action_to_env(agent_action)
         return minerl_action

@@ -139,6 +139,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("prompt")
+    parser.add_argument("--guidance", type=float, default=0.0)
     parser.add_argument("--headless", action="store_true")
     parser.add_argument("--steps", type=int, default=600)
     args = parser.parse_args()
@@ -157,13 +158,14 @@ def main():
         device="cuda",
         policy_kwargs=policy_kwargs,
         pi_head_kwargs=pi_head_kwargs,
+        guidance=args.guidance,
     )
     agent.policy.load_state_dict(policy_ckpt)
     agent.reset()
 
     print(f"running with prompt={args.prompt!r}")
     with torch.amp.autocast("cuda"):
-        cond_emb = text_encoder.embed_prompt(args.prompt).cpu().numpy()
+        cond_embed = text_encoder.embed_prompt(args.prompt).cpu().numpy()
 
     with minerl_env(seed=1, headless=args.headless) as env:
         env.reset(seed=1)
@@ -171,7 +173,7 @@ def main():
 
         frames = []
         for t in tqdm.trange(args.steps):
-            obs["cond_emb"] = cond_emb
+            obs["cond_embed"] = cond_embed
             action = agent.get_action(obs)
             action = {k: v[0] if k == "camera" else v.item() for k, v in action.items()}
             action["ESC"] = 0

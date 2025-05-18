@@ -209,8 +209,8 @@ class MinecraftPolicy(nn.Module):
         if self.pre_lstm_ln is not None:
             x = self.pre_lstm_ln(x)
 
-        if "cond_emb" in ob:  # Added for STEVE-1 support
-            x = x + ob["cond_emb"].type_as(x)
+        if "cond_embed" in ob:  # Added for STEVE-1 support
+            x = x + ob["cond_embed"].type_as(x)
 
         if self.recurrent_layer is not None:
             x, state_out = self.recurrent_layer(x, first, state_in)
@@ -331,12 +331,25 @@ class MinecraftAgentPolicy(nn.Module):
         stochastic: bool = True,
         taken_action=None,
         return_pd=False,
+        guidance: float = 0.0,
     ):
         # We need to add a fictitious time dimension everywhere
         obs = tree_map(lambda x: x.unsqueeze(1), obs)
         first = first.unsqueeze(1)
 
-        (pd, vpred, _), state_out = self(obs=obs, first=first, state_in=state_in)
+        if guidance > 0:
+            assert obs["img"].size(0) == 1
+            obs = tree_map(lambda x: th.cat([x, x], dim=0), obs)
+            obs["cond_embed"][1] = th.zeros_like(obs["cond_embed"][1])
+            first = th.cat([first, first], dim=0)
+            (pd, vpred, _), state_out = self(obs=obs, first=first, state_in=state_in)
+        else:
+            (pd, vpred, _), state_out = self(obs=obs, first=first, state_in=state_in)
+
+        if guidance > 0:
+            pd = tree_map(
+                lambda x: ((1 + guidance) * x[0] - guidance * x[1]).unsqueeze(0), pd
+            )
 
         if taken_action is None:
             ac = self.pi_head.sample(pd, deterministic=not stochastic)
