@@ -5,10 +5,10 @@ import cv2
 import numpy as np
 import torch as th
 from gym import spaces
-from gym3.types import DictType
 
 from .lib.action_mapping import CameraHierarchicalMapping
 from .lib.actions import ActionTransformer
+from .lib.gym3_types import DictType
 from .lib.policy import MinecraftAgentPolicy
 from .lib.torch_util import (
     default_device_type,

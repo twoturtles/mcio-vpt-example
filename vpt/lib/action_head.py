@@ -6,7 +6,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
-from gym3.types import DictType, Discrete, Real, TensorType, ValType
+
+from .gym3_types import DictType, Discrete, Real, TensorType, ValType
 
 LOG0 = -100
 
@@ -39,9 +40,7 @@ class ActionHead(nn.Module):
         """Entropy of this distribution"""
         raise NotImplementedError
 
-    def sample(
-        self, pd_params: torch.Tensor, deterministic: bool = False
-    ) -> Any:
+    def sample(self, pd_params: torch.Tensor, deterministic: bool = False) -> Any:
         """
         Draw a sample from probability distribution given by those params
 
@@ -73,9 +72,7 @@ class DiagGaussianActionHead(ActionHead):
         self.num_dimensions = num_dimensions
 
         self.linear_layer = nn.Linear(input_dim, num_dimensions)
-        self.log_std = nn.Parameter(
-            torch.zeros(num_dimensions), requires_grad=True
-        )
+        self.log_std = nn.Parameter(torch.zeros(num_dimensions), requires_grad=True)
 
     def reset_parameters(self):
         init.orthogonal_(self.linear_layer.weight, gain=0.01)
@@ -102,10 +99,7 @@ class DiagGaussianActionHead(ActionHead):
 
         z_score = (action_sample - means) / std
 
-        return -(
-            0.5 * ((z_score**2 + self.LOG2PI).sum(dim=-1))
-            + log_std.sum(dim=-1)
-        )
+        return -(0.5 * ((z_score**2 + self.LOG2PI).sum(dim=-1)) + log_std.sum(dim=-1))
 
     def entropy(self, pd_params: torch.Tensor) -> torch.Tensor:
         """
@@ -174,20 +168,18 @@ class CategoricalActionHead(ActionHead):
         self.temperature = temperature
 
         if builtin_linear_layer:
-            self.linear_layer = nn.Linear(
-                input_dim, np.prod(self.output_shape)
-            )
+            self.linear_layer = nn.Linear(input_dim, np.prod(self.output_shape))
         else:
-            assert (
-                input_dim == num_actions
-            ), f"If input_dim ({input_dim}) != num_actions ({num_actions}), you need a linear layer to convert them."
+            assert input_dim == num_actions, (
+                f"If input_dim ({input_dim}) != num_actions ({num_actions}), you need a linear layer to convert them."
+            )
             self.linear_layer = None
 
     def reset_parameters(self):
         if self.linear_layer is not None:
             init.orthogonal_(self.linear_layer.weight, gain=0.01)
             init.constant_(self.linear_layer.bias, 0.0)
-            finit.fan_in_linear(self.linear_layer, scale=0.01)
+            fan_in_linear(self.linear_layer, scale=0.01)
 
     def forward(self, input_data: torch.Tensor, mask=None) -> Any:
         if self.linear_layer is not None:
@@ -204,9 +196,7 @@ class CategoricalActionHead(ActionHead):
 
         return F.log_softmax(shaped_out, dim=-1)
 
-    def logprob(
-        self, actions: torch.Tensor, logits: torch.Tensor
-    ) -> torch.Tensor:
+    def logprob(self, actions: torch.Tensor, logits: torch.Tensor) -> torch.Tensor:
         value = actions.long().unsqueeze(-1)
         value, log_pmf = torch.broadcast_tensors(value, logits)
         value = value[..., :1]
@@ -248,9 +238,7 @@ class CategoricalActionHead(ActionHead):
         When talking about logits this is:
         sum exp(Q_i) * (Q_i - P_i)
         """
-        kl = (torch.exp(logits_q) * (logits_q - logits_p)).sum(
-            -1, keepdim=True
-        )
+        kl = (torch.exp(logits_q) * (logits_q - logits_p)).sum(-1, keepdim=True)
         # kl is per-entry, still of size self.output_shape; we need to reduce of the rest of it.
         for _ in self.output_shape[:-1]:
             kl = kl.sum(dim=-2)  # dim=-2 because we use keepdim=True above.
@@ -284,18 +272,14 @@ class DictActionHead(nn.ModuleDict):
             result[head_name] = subhead(input_data, **head_kwargs)
         return result
 
-    def logprob(
-        self, actions: torch.Tensor, logits: torch.Tensor
-    ) -> torch.Tensor:
+    def logprob(self, actions: torch.Tensor, logits: torch.Tensor) -> torch.Tensor:
         return sum(
-            subhead.logprob(actions[k], logits[k])
-            for k, subhead in self.items()
+            subhead.logprob(actions[k], logits[k]) for k, subhead in self.items()
         )
 
     def sample(self, logits: torch.Tensor, deterministic: bool = False) -> Any:
         return {
-            k: subhead.sample(logits[k], deterministic)
-            for k, subhead in self.items()
+            k: subhead.sample(logits[k], deterministic) for k, subhead in self.items()
         }
 
     def entropy(self, logits: torch.Tensor) -> torch.Tensor:
@@ -310,9 +294,7 @@ class DictActionHead(nn.ModuleDict):
         )
 
 
-def make_action_head(
-    ac_space: ValType, pi_out_size: int, temperature: float = 1.0
-):
+def make_action_head(ac_space: ValType, pi_out_size: int, temperature: float = 1.0):
     """Helper function to create an action head corresponding to the environment action space"""
     if isinstance(ac_space, TensorType):
         if isinstance(ac_space.eltype, Discrete):
@@ -327,9 +309,7 @@ def make_action_head(
                 logging.warning(
                     "Non-1 temperature not implemented for DiagGaussianActionHead."
                 )
-            assert (
-                len(ac_space.shape) == 1
-            ), "Nontrivial shapes not yet implemented."
+            assert len(ac_space.shape) == 1, "Nontrivial shapes not yet implemented."
             return DiagGaussianActionHead(pi_out_size, ac_space.shape[0])
     elif isinstance(ac_space, DictType):
         return DictActionHead(
@@ -338,6 +318,4 @@ def make_action_head(
                 for k, v in ac_space.items()
             }
         )
-    raise NotImplementedError(
-        f"Action space of type {type(ac_space)} is not supported"
-    )
+    raise NotImplementedError(f"Action space of type {type(ac_space)} is not supported")

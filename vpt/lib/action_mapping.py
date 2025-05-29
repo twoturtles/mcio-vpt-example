@@ -4,9 +4,9 @@ from collections import OrderedDict
 from typing import Dict, List
 
 import numpy as np
-from gym3.types import DictType, Discrete, TensorType
 
 from .actions import Buttons
+from .gym3_types import DictType, Discrete, TensorType
 
 
 class ActionMapping(abc.ABC):
