@@ -1,7 +1,7 @@
+import mcio_ctrl as mc
 import tqdm
 
 from minerl_wrapper import minerl_env
-from utils import save_frames_to_mp4
 from vpt.agent import MineRLAgent, load_vpt
 
 
@@ -33,7 +33,7 @@ def main():
             obs, _, _, _, _ = env.step(action)
             frames.append(obs["pov"])
 
-    save_frames_to_mp4(frames, "episode.mp4")
+    mc.util.VideoWriter(frames).write("episode.mp4")
 
 
 if __name__ == "__main__":
