@@ -1,7 +1,6 @@
 ## Instructions for VPT:
-1. Install dependencies. For conda users, I've provided an example environment.yml,
-which can be used via `conda env create -f environment.yml`.
-For pip users, there is a `requirements.txt`.
+1. Install dependencies. An example `environment.yml` for conda users and an example
+`requirements.txt` for pip users are provided.
 2. Download the desired `.model` and `.weights` from the [VPT
 github](https://github.com/openai/Video-Pre-Training), and place them in a directory
 called `data/`. For example:

@@ -8,6 +8,7 @@ dependencies:
     - attrs
     - einops
     - gdown
+    - gymnasium
     - mcio_ctrl
     - opencv-python
     - torch
