@@ -1,5 +1,4 @@
 import os
-import pickle
 
 import cv2
 import numpy as np
@@ -241,17 +240,42 @@ class MineRLAgent:
 
 
 def load_vpt(
-    model_filepath="data/pretrained/vpt/3x.model",
-    weights_filepath="data/pretrained/vpt/foundation-model-3x.weights",
+    model="2x.model",
+    weights_filepath="data/pretrained/vpt/foundation-model-2x.weights",
     device="cpu",
 ) -> MineRLAgent:
-    assert os.path.exists(model_filepath)
+    assert model in ("2x.model", "3x.model")
     assert os.path.exists(weights_filepath)
-    with open(model_filepath, "rb") as f:
-        agent_parameters = pickle.load(f)
-    policy_kwargs = agent_parameters["model"]["args"]["net"]["args"]
-    pi_head_kwargs = agent_parameters["model"]["args"]["pi_head_opts"]
-    pi_head_kwargs["temperature"] = float(pi_head_kwargs["temperature"])
+
+    policy_kwargs = {
+        "attention_heads": 16,  # 24 for 3x.model
+        "attention_mask_style": "clipped_causal",
+        "attention_memory_size": 256,
+        "diff_mlp_embedding": False,
+        "hidsize": 2048,  # 3072 for 3x.model
+        "img_shape": [128, 128, 3],
+        "impala_chans": [16, 32, 32],
+        "impala_kwargs": {"post_pool_groups": 1},
+        "impala_width": 8,  # 12 for 3x.model
+        "init_norm_kwargs": {"batch_norm": False, "group_norm_groups": 1},
+        "n_recurrence_layers": 4,
+        "only_img_input": True,
+        "pointwise_ratio": 4,
+        "pointwise_use_activation": False,
+        "recurrence_is_residual": True,
+        "recurrence_type": "transformer",
+        "timesteps": 128,
+        "use_pointwise_layer": True,
+        "use_pre_lstm_ln": False,
+    }
+    if model == "2x.model":
+        pi_head_kwargs = {"temperature": 2.0}
+    else:
+        policy_kwargs["attention_heads"] = 24
+        policy_kwargs["hidsize"] = 3072
+        policy_kwargs["impala_width"] = 12
+        pi_head_kwargs = {"temperature": 3.0}
+
     agent = MineRLAgent(
         device=device,
         policy_kwargs=policy_kwargs,

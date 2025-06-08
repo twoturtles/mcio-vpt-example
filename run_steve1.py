@@ -1,11 +1,10 @@
 import hashlib
-import pickle
 
+import mcio_ctrl as mc
 import torch
 import torch.nn as nn
 import tqdm
 from mineclip import MineCLIP
-import mcio_ctrl as mc
 
 from minerl_wrapper import minerl_env
 from vpt.agent import MineRLAgent
@@ -149,11 +148,28 @@ def main():
     )
     text_encoder = STEVE1PromptEncoder(policy_ckpt).cuda()
 
-    with open("data/2x.model", "rb") as f:
-        agent_parameters = pickle.load(f)
-    policy_kwargs = agent_parameters["model"]["args"]["net"]["args"]
-    pi_head_kwargs = agent_parameters["model"]["args"]["pi_head_opts"]
-    pi_head_kwargs["temperature"] = float(pi_head_kwargs["temperature"])
+    policy_kwargs = {
+        "attention_heads": 16,  # 24 for 3x.model
+        "attention_mask_style": "clipped_causal",
+        "attention_memory_size": 256,
+        "diff_mlp_embedding": False,
+        "hidsize": 2048,  # 3072 for 3x.model
+        "img_shape": [128, 128, 3],
+        "impala_chans": [16, 32, 32],
+        "impala_kwargs": {"post_pool_groups": 1},
+        "impala_width": 8,  # 12 for 3x.model
+        "init_norm_kwargs": {"batch_norm": False, "group_norm_groups": 1},
+        "n_recurrence_layers": 4,
+        "only_img_input": True,
+        "pointwise_ratio": 4,
+        "pointwise_use_activation": False,
+        "recurrence_is_residual": True,
+        "recurrence_type": "transformer",
+        "timesteps": 128,
+        "use_pointwise_layer": True,
+        "use_pre_lstm_ln": False,
+    }
+    pi_head_kwargs = {"temperature": 2.0}
     agent = MineRLAgent(
         device="cuda",
         policy_kwargs=policy_kwargs,
