@@ -16,14 +16,11 @@ def main():
     args = parser.parse_args()
     assert args.model in ("2x.model", "3x.model")
 
-    vpt: MineRLAgent = load_vpt(
-        model=args.model, weights_filepath=args.weights, device="cuda"
-    )
+    vpt: MineRLAgent = load_vpt(model=args.model, weights_filepath=args.weights)
     vpt.reset()
 
     with minerl_env(seed=1, headless=args.headless) as env:
-        env.reset(seed=1)
-        obs, _, _, _, _ = env.skip_steps(100)  # Wait for rendering...
+        obs = env.reset(seed=1)[0]
 
         frames = []
         for t in tqdm.trange(args.steps):

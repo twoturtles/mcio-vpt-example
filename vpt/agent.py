@@ -9,10 +9,7 @@ from .lib.action_mapping import CameraHierarchicalMapping
 from .lib.actions import ActionTransformer
 from .lib.gym3_types import DictType
 from .lib.policy import MinecraftAgentPolicy
-from .lib.torch_util import (
-    default_device_type,
-    set_default_torch_device,
-)
+from .lib.torch_util import default_device_type, set_default_torch_device
 
 # Hardcoded settings
 AGENT_RESOLUTION = (128, 128)
@@ -124,6 +121,7 @@ class MineRLAgent:
     ):
         if device is None:
             device = default_device_type()
+        print(f"Torch device: {device}")
         self.device = th.device(device)
         # Set the default torch device for underlying code as well
         set_default_torch_device(self.device)
@@ -242,7 +240,7 @@ class MineRLAgent:
 def load_vpt(
     model="2x.model",
     weights_filepath="data/pretrained/vpt/foundation-model-2x.weights",
-    device="cpu",
+    device=None,
 ) -> MineRLAgent:
     assert model in ("2x.model", "3x.model")
     assert os.path.exists(weights_filepath)

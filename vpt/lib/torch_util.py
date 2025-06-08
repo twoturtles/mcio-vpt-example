@@ -16,12 +16,13 @@ def contextmanager_to_decorator(cm):
     return decorator
 
 
-def have_cuda():
-    return th.cuda.is_available()
-
-
-def default_device_type():
-    return "cuda" if have_cuda() else "cpu"
+def default_device_type() -> str:
+    if th.cuda.is_available():
+        return "cuda"
+    elif th.backends.mps.is_available():
+        return "mps"
+    else:
+        return "cpu"
 
 
 no_grad = contextmanager_to_decorator(th.no_grad)
