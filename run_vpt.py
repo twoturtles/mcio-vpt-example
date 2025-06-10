@@ -2,12 +2,12 @@ import pprint
 
 import mcio_ctrl as mc
 import tqdm
-from vpt.agent import MineRLAgent, load_vpt
 
+from mcio_agent.agent import MineRLAgent, load_vpt
 from minerl_wrapper import minerl_env
 
 
-def main():
+def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser()
