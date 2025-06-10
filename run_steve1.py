@@ -5,8 +5,9 @@ import torch
 import torch.nn as nn
 import tqdm
 from mineclip import MineCLIP
-from vpt.agent import MineRLAgent
 
+from mcio_agent.agent import MineRLAgent
+from mcio_agent.lib import torch_util
 from minerl_wrapper import minerl_env
 
 MINECLIP_CONFIG = {
@@ -133,7 +134,7 @@ class STEVE1PromptEncoder(nn.Module):
 # TODO: support for guidance.
 
 
-def main():
+def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -143,10 +144,11 @@ def main():
     parser.add_argument("--steps", type=int, default=600)
     args = parser.parse_args()
 
+    device = torch_util.default_device_type()
     policy_ckpt = torch.load(
         "data/steve1.weights", weights_only=True, map_location="cpu"
     )
-    text_encoder = STEVE1PromptEncoder(policy_ckpt).cuda()
+    text_encoder = STEVE1PromptEncoder(policy_ckpt).to(device)
 
     policy_kwargs = {
         "attention_heads": 16,  # 24 for 3x.model
@@ -171,7 +173,6 @@ def main():
     }
     pi_head_kwargs = {"temperature": 2.0}
     agent = MineRLAgent(
-        device="cuda",
         policy_kwargs=policy_kwargs,
         pi_head_kwargs=pi_head_kwargs,
         guidance=args.guidance,
@@ -180,10 +181,10 @@ def main():
     agent.reset()
 
     print(f"running with prompt={args.prompt!r}")
-    with torch.amp.autocast("cuda"):
+    with torch.amp.autocast(device):
         cond_embed = text_encoder.embed_prompt(args.prompt).cpu().numpy()
 
-    with minerl_env(seed=1, headless=args.headless) as env:
+    with minerl_env(seed=1, headless=args.headless, gui=True, connect=False) as env:
         env.reset(seed=1)
         obs, _, _, _, _ = env.skip_steps(100)  # Wait for rendering...
 
