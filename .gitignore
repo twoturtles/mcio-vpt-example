@@ -5,7 +5,7 @@
 __pycache__
 
 mcio/
-data/
+data
 
 .DS_Store
 .vscode
