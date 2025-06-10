@@ -1,8 +1,8 @@
 import mcio_ctrl as mc
 import tqdm
+from vpt.agent import MineRLAgent, load_vpt
 
 from minerl_wrapper import minerl_env
-from vpt.agent import MineRLAgent, load_vpt
 
 
 def main():

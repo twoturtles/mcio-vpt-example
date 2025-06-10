@@ -5,9 +5,9 @@ import torch
 import torch.nn as nn
 import tqdm
 from mineclip import MineCLIP
+from vpt.agent import MineRLAgent
 
 from minerl_wrapper import minerl_env
-from vpt.agent import MineRLAgent
 
 MINECLIP_CONFIG = {
     "arch": "vit_base_p16_fz.v2.t2",
