@@ -1,0 +1,26 @@
+[project]
+name = "mcio_agent"
+version = "0.1.0"
+authors = [
+    { name = "Jerry Xiong" },
+    { name = "TwoTurtles", email = "97465192+twoturtles@users.noreply.github.com" },
+]
+description = "Support VPT and STEVE-1 on top of mcio"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "attrs",
+    "einops",
+    "gdown",
+    "gymnasium",
+    "mcio_ctrl",
+    "opencv-python",
+    "torch",
+    "tqdm",
+    "xvfbwrapper",
+    "git+https://github.com/jxiong21029/MineCLIP-model",
+]
+
+[build-system]
+requires = ["uv_build>=0.7.12,<0.8"]
+build-backend = "uv_build"
