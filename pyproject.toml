@@ -14,11 +14,11 @@ dependencies = [
     "gdown",
     "gymnasium",
     "mcio_ctrl",
+    "mineclip @ git+https://github.com/jxiong21029/MineCLIP-model",
     "opencv-python",
     "torch",
     "tqdm",
     "xvfbwrapper",
-    "git+https://github.com/jxiong21029/MineCLIP-model",
 ]
 
 [build-system]
