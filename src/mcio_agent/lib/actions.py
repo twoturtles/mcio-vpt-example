@@ -164,9 +164,9 @@ class ActionTransformer:
         """
         Numpy policy output to env-compatible format.
         """
-        assert acs["buttons"].shape[-1] == len(Buttons.ALL), (
-            f"Mismatched actions: {acs}; expected {len(Buttons.ALL)}:\n(  {Buttons.ALL})"
-        )
+        assert acs["buttons"].shape[-1] == len(
+            Buttons.ALL
+        ), f"Mismatched actions: {acs}; expected {len(Buttons.ALL)}:\n(  {Buttons.ALL})"
         out = {name: acs["buttons"][..., i] for (i, name) in enumerate(Buttons.ALL)}
 
         out["camera"] = self.undiscretize_camera(acs["camera"])

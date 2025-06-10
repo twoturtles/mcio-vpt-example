@@ -126,9 +126,9 @@ def split_heads(x_bte, h):
 class All2All(Attn):
     def __init__(self, nhead, maxlen, mask=True, head_dim=None):
         super().__init__(mask=mask, maxlen=maxlen)
-        assert (nhead is None) != (head_dim is None), (
-            "exactly one of nhead and head_dim must be specified"
-        )
+        assert (nhead is None) != (
+            head_dim is None
+        ), "exactly one of nhead and head_dim must be specified"
         self.h = nhead
         self.head_dim = head_dim
 

@@ -170,9 +170,9 @@ class CategoricalActionHead(ActionHead):
         if builtin_linear_layer:
             self.linear_layer = nn.Linear(input_dim, np.prod(self.output_shape))
         else:
-            assert input_dim == num_actions, (
-                f"If input_dim ({input_dim}) != num_actions ({num_actions}), you need a linear layer to convert them."
-            )
+            assert (
+                input_dim == num_actions
+            ), f"If input_dim ({input_dim}) != num_actions ({num_actions}), you need a linear layer to convert them."
             self.linear_layer = None
 
     def reset_parameters(self):

@@ -121,9 +121,9 @@ class ResidualRecurrentBlocks(nn.Module):
 
     def forward(self, x, first, state):
         state_out = []
-        assert len(state) == len(self.blocks), (
-            f"Length of state {len(state)} did not match length of blocks {len(self.blocks)}"
-        )
+        assert len(state) == len(
+            self.blocks
+        ), f"Length of state {len(state)} did not match length of blocks {len(self.blocks)}"
         for block, _s_in in zip(self.blocks, state):
             x, _s_o = block(x, first, _s_in)
             state_out.append(_s_o)

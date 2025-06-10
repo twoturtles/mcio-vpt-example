@@ -22,15 +22,11 @@ class NormalizeEwma(nn.Module):
         self.beta = beta
         self.per_element_update = per_element_update
 
-        self.running_mean = nn.Parameter(
-            torch.zeros(input_shape), requires_grad=False
-        )
+        self.running_mean = nn.Parameter(torch.zeros(input_shape), requires_grad=False)
         self.running_mean_sq = nn.Parameter(
             torch.zeros(input_shape), requires_grad=False
         )
-        self.debiasing_term = nn.Parameter(
-            torch.tensor(0.0), requires_grad=False
-        )
+        self.debiasing_term = nn.Parameter(torch.tensor(0.0), requires_grad=False)
 
     def reset_parameters(self):
         self.running_mean.zero_()
@@ -38,9 +34,7 @@ class NormalizeEwma(nn.Module):
         self.debiasing_term.zero_()
 
     def running_mean_var(self):
-        debiased_mean = self.running_mean / self.debiasing_term.clamp(
-            min=self.epsilon
-        )
+        debiased_mean = self.running_mean / self.debiasing_term.clamp(min=self.epsilon)
         debiased_mean_sq = self.running_mean_sq / self.debiasing_term.clamp(
             min=self.epsilon
         )
@@ -53,9 +47,7 @@ class NormalizeEwma(nn.Module):
             # subsequent batches.
             detached_input = input_vector.detach()
             batch_mean = detached_input.mean(dim=tuple(range(self.norm_axes)))
-            batch_sq_mean = (detached_input**2).mean(
-                dim=tuple(range(self.norm_axes))
-            )
+            batch_sq_mean = (detached_input**2).mean(dim=tuple(range(self.norm_axes)))
 
             if self.per_element_update:
                 batch_size = np.prod(detached_input.size()[: self.norm_axes])
@@ -64,15 +56,13 @@ class NormalizeEwma(nn.Module):
                 weight = self.beta
 
             self.running_mean.mul_(weight).add_(batch_mean * (1.0 - weight))
-            self.running_mean_sq.mul_(weight).add_(
-                batch_sq_mean * (1.0 - weight)
-            )
+            self.running_mean_sq.mul_(weight).add_(batch_sq_mean * (1.0 - weight))
             self.debiasing_term.mul_(weight).add_(1.0 * (1.0 - weight))
 
         mean, var = self.running_mean_var()
-        return (input_vector - mean[(None,) * self.norm_axes]) / torch.sqrt(
-            var
-        )[(None,) * self.norm_axes]
+        return (input_vector - mean[(None,) * self.norm_axes]) / torch.sqrt(var)[
+            (None,) * self.norm_axes
+        ]
 
     def denormalize(self, input_vector):
         """Transform normalized data back into original distribution"""

@@ -79,12 +79,12 @@ class ActionMapping(abc.ABC):
 
         Returns a list of length B, where each element is an item from button_group.
         """
-        assert ac_buttons.shape[1] == len(Buttons.ALL), (
-            f"There should be {len(Buttons.ALL)} buttons in the factored buttons space"
-        )
-        assert button_group[0] == "none", (
-            "This function only works if 'none' is in button_group"
-        )
+        assert ac_buttons.shape[1] == len(
+            Buttons.ALL
+        ), f"There should be {len(Buttons.ALL)} buttons in the factored buttons space"
+        assert (
+            button_group[0] == "none"
+        ), "This function only works if 'none' is in button_group"
         # Actions in ac_buttons with order according to button_group
         group_indices = [Buttons.ALL.index(b) for b in button_group if b != "none"]
         ac_choices = ac_buttons[:, group_indices]

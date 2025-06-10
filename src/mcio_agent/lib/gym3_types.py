@@ -65,9 +65,9 @@ class Discrete(ScalarType):
         self.dtype_name = dtype_name
         assert self.dtype_name in INTEGER_DTYPE_NAMES
         max_value = DTYPE_NAME_TO_MAX_VALUE[self.dtype_name]
-        assert n <= max_value + 1, (
-            f"{n} cannot be greater than {max_value + 1} for dtype_name={dtype_name}"
-        )
+        assert (
+            n <= max_value + 1
+        ), f"{n} cannot be greater than {max_value + 1} for dtype_name={dtype_name}"
 
     def __repr__(self):
         return f"<Discrete: {self}>"
