@@ -12,7 +12,7 @@ INSTANCE_NAME = "main"
 
 
 @contextlib.contextmanager
-def minerl_env(seed, headless: bool) -> Iterator[MinerlEnv]:
+def minerl_env(seed, headless: bool, gui: bool, connect: bool) -> Iterator[MinerlEnv]:
     mcio_dir = Path(MCIO_DIR).absolute()
     mcio_dir.mkdir(exist_ok=True)
     world_name = f"world_{seed}"
@@ -31,17 +31,23 @@ def minerl_env(seed, headless: bool) -> Iterator[MinerlEnv]:
     wm.copy(STORAGE_LOCATION, world_name, INSTANCE_NAME)
 
     env = None
+    render_mode = "rgb_array"
+    instance_name = INSTANCE_NAME if not connect else None
+
     if headless:
         from xvfbfixed import XvfbFixed
 
         context = XvfbFixed
     else:
         context = contextlib.nullcontext
+        if gui:
+            render_mode = "human"
+
     with context():
         try:
             opts = RunOptions(
                 mcio_dir=mcio_dir,
-                instance_name=INSTANCE_NAME,
+                instance_name=instance_name,
                 world_name=world_name,
                 hide_window=True,
                 mcio_mode=MCioMode.SYNC,
@@ -49,7 +55,7 @@ def minerl_env(seed, headless: bool) -> Iterator[MinerlEnv]:
                 height=360,
                 mc_username="MCioAgent",
             )
-            env = MinerlEnv(opts, render_mode="rgb_array")
+            env = MinerlEnv(opts, render_mode=render_mode)
             yield env
 
         finally:
