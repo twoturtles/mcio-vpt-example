@@ -1,5 +1,7 @@
 import hashlib
 import pprint
+import threading
+from queue import SimpleQueue
 
 import mcio_ctrl as mc
 import torch
@@ -25,7 +27,16 @@ MINECLIP_CONFIG = {
 }
 
 
-def load_mineclip():
+prompt_queue: SimpleQueue[str] = SimpleQueue()
+
+
+def input_thread() -> None:
+    while True:
+        new_prompt = input("\n\nEnter new prompt: \n")
+        prompt_queue.put(new_prompt)
+
+
+def load_mineclip() -> None:
     cfg = MINECLIP_CONFIG.copy()
     ckpt = cfg.pop("ckpt")
     assert (
@@ -194,9 +205,8 @@ def main() -> None:
     agent.policy.load_state_dict(policy_ckpt)
     agent.reset()
 
-    print(f"running with prompt={args.prompt!r}")
-    with torch.amp.autocast(device):
-        cond_embed = text_encoder.embed_prompt(args.prompt).cpu().numpy()
+    prompt_queue.put(args.prompt)
+    threading.Thread(target=input_thread, daemon=True).start()
 
     with minerl_env(
         seed=1, headless=args.headless, gui=gui, connect=args.connect
@@ -207,6 +217,12 @@ def main() -> None:
         if args.video:
             vid = mc.util.VideoWriter()
         for t in tqdm.trange(args.steps):
+            if not prompt_queue.empty():
+                prompt = prompt_queue.get()
+                with torch.amp.autocast(device):
+                    cond_embed = text_encoder.embed_prompt(prompt).cpu().numpy()
+                print(f"running with prompt={prompt!r}")
+
             obs["cond_embed"] = cond_embed
             action = agent.get_action(obs)
             action = {k: v[0] if k == "camera" else v.item() for k, v in action.items()}
