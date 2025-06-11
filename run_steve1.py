@@ -1,4 +1,5 @@
 import hashlib
+import pprint
 
 import mcio_ctrl as mc
 import torch
@@ -142,7 +143,20 @@ def main() -> None:
     parser.add_argument("--guidance", type=float, default=0.0)
     parser.add_argument("--headless", action="store_true")
     parser.add_argument("--steps", type=int, default=600)
+    parser.add_argument(
+        "--gui",
+        "-G",
+        action="store_true",
+        default=False,
+        help="Render to screen",
+    )
+    parser.add_argument("--video", "-V", default=None, help="Save video to file")
+    parser.add_argument(
+        "--connect", "-c", action="store_true", help="Connect to running instance"
+    )
     args = parser.parse_args()
+
+    gui = args.gui if not args.headless else False
 
     device = torch_util.default_device_type()
     policy_ckpt = torch.load(
@@ -184,11 +198,14 @@ def main() -> None:
     with torch.amp.autocast(device):
         cond_embed = text_encoder.embed_prompt(args.prompt).cpu().numpy()
 
-    with minerl_env(seed=1, headless=args.headless, gui=True, connect=False) as env:
+    with minerl_env(
+        seed=1, headless=args.headless, gui=gui, connect=args.connect
+    ) as env:
         env.reset(seed=1)
         obs, _, _, _, _ = env.skip_steps(100)  # Wait for rendering...
 
-        frames = []
+        if args.video:
+            vid = mc.util.VideoWriter()
         for t in tqdm.trange(args.steps):
             obs["cond_embed"] = cond_embed
             action = agent.get_action(obs)
@@ -196,9 +213,14 @@ def main() -> None:
             action["ESC"] = 0
 
             obs, _, _, _, _ = env.step(action)
-            frames.append(obs["pov"])
+            if args.gui:
+                env.render()
+            if args.video:
+                vid.add(obs["pov"])
 
-    mc.util.VideoWriter(frames).write("episode_steve1.mp4")
+    if args.video:
+        vid.write(args.video)
+    pprint.pprint(env.stats_cache)
 
 
 if __name__ == "__main__":
